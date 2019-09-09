@@ -1,0 +1,16 @@
+
+Hello/
+InstCombine/
+Instrumentation/
+IPO/
+ObjCARC/
+Scalar/
+Utils/
+Vectorize/
+*.*~
+Branch/*.*~
+.cproject
+.project
+.settings/
+*.ll
+*.bc

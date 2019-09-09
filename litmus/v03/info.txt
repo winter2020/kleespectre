@@ -1,0 +1,222 @@
+********** X86 speculative load hardening : victim_fun **********
+Tracing predicate through block: entry
+  Inserting cmov:   %8:gr64_nosp = CMOVA64rr %6:gr64_nosp(tied-def 0), %5:gr64_nosp, implicit killed $eflags
+
+  Inserting cmov:   %9:gr64_nosp = CMOVBE64rr %6:gr64_nosp(tied-def 0), %5:gr64_nosp, implicit killed $eflags
+
+  Inserting or:   %13:gr32 = OR32rr %12:gr32(tied-def 0), %11:gr32, implicit-def dead $eflags, debug-location !60; test.c:22:42
+
+Final speculative load hardened function:
+# Machine code for function victim_fun: IsSSA, TracksLiveness
+Function Live Ins: $rdi in %0
+
+bb.0.entry:
+  successors: %bb.1(0x40000000), %bb.2(0x40000000); %bb.1(50.00%), %bb.2(50.00%)
+  liveins: $rdi
+  DBG_VALUE $rdi, $noreg, !"x", !DIExpression(), debug-location !51; test.c:20:24 line no:20
+  %5:gr64_nosp = MOV64ri32 -1
+  %7:gr64_nosp = COPY $rsp
+  %6:gr64_nosp = SAR64ri killed %7:gr64_nosp(tied-def 0), 63, implicit-def dead $eflags
+  %0:gr64 = COPY $rdi
+  DBG_VALUE %0:gr64, $noreg, !"x", !DIExpression(), debug-location !51; test.c:20:24 line no:20
+  %1:gr32 = MOV32rm $rip, 1, $noreg, @array1_size, $noreg, debug-location !52 :: (dereferenceable load 4 from @array1_size, !tbaa !54); test.c:21:18
+  %2:gr64 = SUBREG_TO_REG 0, killed %1:gr32, %subreg.sub_32bit, debug-location !52; test.c:21:18
+  CMP64rr %2:gr64, %0:gr64, implicit-def $eflags, debug-location !58; test.c:21:16
+  JBE_1 %bb.2, implicit $eflags, debug-location !59; test.c:21:14
+  JMP_1 %bb.1, debug-location !59; test.c:21:14
+
+bb.1.if.then:
+; predecessors: %bb.0
+  liveins: $eflags
+  %9:gr64_nosp = CMOVBE64rr %6:gr64_nosp(tied-def 0), %5:gr64_nosp, implicit killed $eflags
+  %11:gr32 = MOVZX32rm8 %0:gr64, 1, $noreg, @array1, $noreg, debug-location !60 :: (load 1 from %ir.arrayidx, !tbaa !61); test.c:22:42
+  %12:gr32 = COPY %9.sub_32bit:gr64_nosp, debug-location !60; test.c:22:42
+  %13:gr32 = OR32rr %12:gr32(tied-def 0), %11:gr32, implicit-def dead $eflags, debug-location !60; test.c:22:42
+  $edi = COPY %13:gr32, debug-location !62; test.c:22:17
+  %14:gr64_nosp = SHL64ri killed %9:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !62; test.c:22:17
+  $rsp = OR64rr $rsp(tied-def 0), killed %14:gr64_nosp, implicit-def dead $eflags, debug-location !62; test.c:22:17
+  TCRETURNdi64 @leakByteNoinlineFunction, 0, <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit $edi, debug-location !62; test.c:22:17
+
+bb.2.if.end:
+; predecessors: %bb.0
+  liveins: $eflags
+  %8:gr64_nosp = CMOVA64rr %6:gr64_nosp(tied-def 0), %5:gr64_nosp, implicit killed $eflags
+  %15:gr64_nosp = SHL64ri killed %8:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !63; test.c:23:1
+  $rsp = OR64rr $rsp(tied-def 0), killed %15:gr64_nosp, implicit-def dead $eflags, debug-location !63; test.c:23:1
+  RET 0, debug-location !63; test.c:23:1
+
+# End machine code for function victim_fun.
+
+
+********** X86 speculative load hardening : leakByteNoinlineFunction **********
+  Inserting or:   %11:gr8 = OR8rr %10:gr8(tied-def 0), %9:gr8, implicit-def dead $eflags, debug-location !72; test.c:17:13
+
+Final speculative load hardened function:
+# Machine code for function leakByteNoinlineFunction: IsSSA, TracksLiveness
+Function Live Ins: $edi in %0
+
+bb.0.entry:
+  liveins: $edi
+  DBG_VALUE $edi, $noreg, !"k", !DIExpression(), debug-location !69; test.c:16:73 line no:16
+  %5:gr64_nosp = MOV64ri32 -1
+  %7:gr64_nosp = COPY $rsp
+  %6:gr64_nosp = SAR64ri killed %7:gr64_nosp(tied-def 0), 63, implicit-def dead $eflags
+  %0:gr32 = COPY $edi
+  DBG_VALUE %0:gr32, $noreg, !"k", !DIExpression(), debug-location !69; test.c:16:73 line no:16
+  %1:gr32 = MOV32rr %0:gr32, debug-location !70; test.c:17:20
+  %2:gr64 = SUBREG_TO_REG 0, killed %1:gr32, %subreg.sub_32bit, debug-location !70; test.c:17:20
+  %3:gr64 = nuw nsw SHL64ri %2:gr64(tied-def 0), 9, implicit-def dead $eflags, debug-location !71; test.c:17:21
+  %9:gr8 = MOV8rm killed %3:gr64, 1, $noreg, @array2, $noreg, debug-location !72 :: (load 1 from %ir.arrayidx, align 16, !tbaa !61); test.c:17:13
+  %10:gr8 = COPY %6.sub_8bit:gr64_nosp, debug-location !72; test.c:17:13
+  %11:gr8 = OR8rr %10:gr8(tied-def 0), %9:gr8, implicit-def dead $eflags, debug-location !72; test.c:17:13
+  AND8mr $rip, 1, $noreg, @temp, $noreg, killed %11:gr8, implicit-def dead $eflags, debug-location !73 :: (store 1 into @temp, !tbaa !61), (dereferenceable load 1 from @temp, !tbaa !61); test.c:17:10
+  %12:gr64_nosp = SHL64ri killed %6:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !74; test.c:18:1
+  $rsp = OR64rr $rsp(tied-def 0), killed %12:gr64_nosp, implicit-def dead $eflags, debug-location !74; test.c:18:1
+  RET 0, debug-location !74; test.c:18:1
+
+# End machine code for function leakByteNoinlineFunction.
+
+
+********** X86 speculative load hardening : main **********
+Tracing predicate through block: entry
+  Inserting cmov:   %20:gr64_nosp = CMOVE64rr %18:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+
+  Inserting cmov:   %21:gr64_nosp = CMOVNE64rr %18:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+
+Tracing predicate through block: if.end
+  Split edge from 'if.end' to 'cleanup'.
+  Inserting cmov:   %22:gr64_nosp = CMOVA64rr %18:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+
+  Inserting cmov:   %23:gr64_nosp = CMOVBE64rr %18:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+
+  Inserting cmov:   %29:gr64_nosp = CMOVNE64rr killed %27:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !143; test.c:28:18
+
+  Inserting cmov:   %34:gr64_nosp = CMOVNE64rr killed %32:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !148; test.c:31:9
+
+  Inserting cmov:   %39:gr64_nosp = CMOVNE64rr killed %37:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !151; test.c:34:14
+
+  Inserting or:   %42:gr32 = OR32rr %41:gr32(tied-def 0), %40:gr32, implicit-def dead $eflags, debug-location !159; test.c:22:42 @[ test.c:35:5 ]
+
+  Inserting cmov:   %47:gr64_nosp = CMOVNE64rr killed %45:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+
+Final speculative load hardened function:
+# Machine code for function main: IsSSA, TracksLiveness
+
+bb.0.entry:
+  successors: %bb.1(0x30000000), %bb.2(0x50000000); %bb.1(37.50%), %bb.2(62.50%)
+
+  DBG_VALUE $edi, $noreg, !"argn", !DIExpression(), debug-location !141; test.c:25:14 line no:25
+  DBG_VALUE $rsi, $noreg, !"args", !DIExpression(), debug-location !142; test.c:25:26 line no:25
+  %17:gr64_nosp = MOV64ri32 -1
+  %19:gr64_nosp = COPY $rsp
+  %18:gr64_nosp = SAR64ri killed %19:gr64_nosp(tied-def 0), 63, implicit-def dead $eflags
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !143; test.c:28:18
+  %4:gr64 = MOV32ri64 @.str, debug-location !143; test.c:28:18
+  %5:gr64 = MOV32ri64 @.str.1, debug-location !143; test.c:28:18
+  $rdi = COPY %4:gr64, debug-location !143; test.c:28:18
+  $rsi = COPY %5:gr64, debug-location !143; test.c:28:18
+  %25:gr64_nosp = SHL64ri killed %18:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !143; test.c:28:18
+  $rsp = OR64rr $rsp(tied-def 0), killed %25:gr64_nosp, implicit-def dead $eflags, debug-location !143; test.c:28:18
+  CALL64pcrel32 @fopen, <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit $rdi, implicit $rsi, implicit-def $rsp, implicit-def $ssp, implicit-def $rax, post-instr-symbol <mcsymbol >, debug-location !143; test.c:28:18
+  %26:gr64 = MOV64rm $rsp, 1, $noreg, -8, $noreg, debug-location !143; test.c:28:18
+  %28:gr64_nosp = COPY $rsp, debug-location !143; test.c:28:18
+  %27:gr64_nosp = SAR64ri killed %28:gr64_nosp(tied-def 0), 63, implicit-def dead $eflags, debug-location !143; test.c:28:18
+  CMP64ri32 killed %26:gr64, <mcsymbol >, implicit-def $eflags, debug-location !143; test.c:28:18
+  %29:gr64_nosp = CMOVNE64rr killed %27:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !143; test.c:28:18
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !143; test.c:28:18
+  %6:gr64 = COPY $rax, debug-location !143; test.c:28:18
+  DBG_VALUE %6:gr64, $noreg, !"file", !DIExpression(), debug-location !144; test.c:28:11 line no:28
+  TEST64rr %6:gr64, %6:gr64, implicit-def $eflags, debug-location !145; test.c:30:14
+  JNE_1 %bb.2, implicit $eflags, debug-location !147; test.c:30:9
+  JMP_1 %bb.1, debug-location !147; test.c:30:9
+
+bb.1.if.then:
+; predecessors: %bb.0
+  successors: %bb.4(0x80000000); %bb.4(100.00%)
+  liveins: $eflags
+  %21:gr64_nosp = CMOVNE64rr %29:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !148; test.c:31:9
+  %12:gr64 = MOV32ri64 @.str.2, debug-location !148; test.c:31:9
+  %13:gr32 = MOV32r0 implicit-def dead $eflags
+  %14:gr8 = COPY %13.sub_8bit:gr32
+  $rdi = COPY %12:gr64, debug-location !148; test.c:31:9
+  $al = COPY %14:gr8, debug-location !148; test.c:31:9
+  %30:gr64_nosp = SHL64ri killed %21:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !148; test.c:31:9
+  $rsp = OR64rr $rsp(tied-def 0), killed %30:gr64_nosp, implicit-def dead $eflags, debug-location !148; test.c:31:9
+  CALL64pcrel32 @printf, <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit $rdi, implicit $al, implicit-def $rsp, implicit-def $ssp, implicit-def $eax, post-instr-symbol <mcsymbol >, debug-location !148; test.c:31:9
+  %31:gr64 = MOV64rm $rsp, 1, $noreg, -8, $noreg, debug-location !148; test.c:31:9
+  %33:gr64_nosp = COPY $rsp, debug-location !148; test.c:31:9
+  %32:gr64_nosp = SAR64ri killed %33:gr64_nosp(tied-def 0), 63, implicit-def dead $eflags, debug-location !148; test.c:31:9
+  CMP64ri32 killed %31:gr64, <mcsymbol >, implicit-def $eflags, debug-location !148; test.c:31:9
+  %34:gr64_nosp = CMOVNE64rr killed %32:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !148; test.c:31:9
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !148; test.c:31:9
+  JMP_1 %bb.4, debug-location !150; test.c:32:9
+
+bb.2.if.end:
+; predecessors: %bb.0
+  successors: %bb.3(0x40000000), %bb.5(0x40000000); %bb.3(50.00%), %bb.5(50.00%)
+  liveins: $eflags
+  %20:gr64_nosp = CMOVE64rr %29:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+  %0:gr64 = COPY %6:gr64, debug-location !DILocation(line: 0, scope: !75); test.c:0
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !151; test.c:34:14
+  $rdi = COPY %0:gr64, debug-location !151; test.c:34:14
+  %35:gr64_nosp = SHL64ri killed %20:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !151; test.c:34:14
+  $rsp = OR64rr $rsp(tied-def 0), killed %35:gr64_nosp, implicit-def dead $eflags, debug-location !151; test.c:34:14
+  CALL64pcrel32 @fgetc_unlocked, <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit $rdi, implicit-def $rsp, implicit-def $ssp, implicit-def $eax, post-instr-symbol <mcsymbol >, debug-location !151; test.c:34:14
+  %36:gr64 = MOV64rm $rsp, 1, $noreg, -8, $noreg, debug-location !151; test.c:34:14
+  %38:gr64_nosp = COPY $rsp, debug-location !151; test.c:34:14
+  %37:gr64_nosp = SAR64ri killed %38:gr64_nosp(tied-def 0), 63, implicit-def dead $eflags, debug-location !151; test.c:34:14
+  CMP64ri32 killed %36:gr64, <mcsymbol >, implicit-def $eflags, debug-location !151; test.c:34:14
+  %39:gr64_nosp = CMOVNE64rr killed %37:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !151; test.c:34:14
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !151; test.c:34:14
+  %7:gr32 = COPY $eax, debug-location !151; test.c:34:14
+  DBG_VALUE %7:gr32, $noreg, !"source", !DIExpression(), debug-location !152; test.c:26:9 line no:26
+  %1:gr64 = MOVSX64rr32 %7:gr32, debug-location !153; test.c:35:16
+  DBG_VALUE %1:gr64, $noreg, !"x", !DIExpression(), debug-location !154; test.c:20:24 @[ test.c:35:5 ] line no:20
+  %8:gr32 = MOV32rm $rip, 1, $noreg, @array1_size, $noreg, debug-location !156 :: (dereferenceable load 4 from @array1_size, !tbaa !54); test.c:21:18 @[ test.c:35:5 ]
+  %9:gr64 = SUBREG_TO_REG 0, killed %8:gr32, %subreg.sub_32bit, debug-location !156; test.c:21:18 @[ test.c:35:5 ]
+  CMP64rr %9:gr64, %1:gr64, implicit-def $eflags, debug-location !157; test.c:21:16 @[ test.c:35:5 ]
+  JBE_1 %bb.5, implicit $eflags, debug-location !158; test.c:21:14 @[ test.c:35:5 ]
+  JMP_1 %bb.3, debug-location !158; test.c:21:14 @[ test.c:35:5 ]
+
+bb.5:
+; predecessors: %bb.2
+  successors: %bb.4(0x80000000); %bb.4(100.00%)
+  liveins: $eflags
+  %22:gr64_nosp = CMOVA64rr %39:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+  JMP_1 %bb.4, debug-location !158; test.c:21:14 @[ test.c:35:5 ]
+
+bb.3.if.then.i:
+; predecessors: %bb.2
+  successors: %bb.4(0x80000000); %bb.4(100.00%)
+  liveins: $eflags
+  %23:gr64_nosp = CMOVBE64rr %39:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags
+  %40:gr32 = MOVZX32rm8 %1:gr64, 1, $noreg, @array1, $noreg, debug-location !159 :: (load 1 from %ir.arrayidx.i, !tbaa !61); test.c:22:42 @[ test.c:35:5 ]
+  %41:gr32 = COPY %23.sub_32bit:gr64_nosp, debug-location !159; test.c:22:42 @[ test.c:35:5 ]
+  %42:gr32 = OR32rr %41:gr32(tied-def 0), %40:gr32, implicit-def dead $eflags, debug-location !159; test.c:22:42 @[ test.c:35:5 ]
+  ADJCALLSTACKDOWN64 0, 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  $edi = COPY %42:gr32, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  %43:gr64_nosp = SHL64ri killed %23:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  $rsp = OR64rr $rsp(tied-def 0), killed %43:gr64_nosp, implicit-def dead $eflags, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  CALL64pcrel32 @leakByteNoinlineFunction, <regmask $bh $bl $bp $bph $bpl $bx $ebp $ebx $hbp $hbx $rbp $rbx $r12 $r13 $r14 $r15 $r12b $r13b $r14b $r15b $r12bh $r13bh $r14bh $r15bh $r12d $r13d $r14d $r15d $r12w $r13w $r14w $r15w $r12wh and 3 more...>, implicit $rsp, implicit $ssp, implicit $edi, implicit-def $rsp, implicit-def $ssp, post-instr-symbol <mcsymbol >, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  %44:gr64 = MOV64rm $rsp, 1, $noreg, -8, $noreg, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  %46:gr64_nosp = COPY $rsp, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  %45:gr64_nosp = SAR64ri killed %46:gr64_nosp(tied-def 0), 63, implicit-def dead $eflags, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  CMP64ri32 killed %44:gr64, <mcsymbol >, implicit-def $eflags, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  %47:gr64_nosp = CMOVNE64rr killed %45:gr64_nosp(tied-def 0), %17:gr64_nosp, implicit killed $eflags, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+  ADJCALLSTACKUP64 0, 0, implicit-def dead $rsp, implicit-def dead $eflags, implicit-def dead $ssp, implicit $rsp, implicit $ssp, debug-location !160; test.c:22:17 @[ test.c:35:5 ]
+
+bb.4.cleanup:
+; predecessors: %bb.3, %bb.1, %bb.5
+
+  %48:gr64_nosp = PHI %47:gr64_nosp, %bb.3, %34:gr64_nosp, %bb.1, %22:gr64_nosp, %bb.5
+  %16:gr32 = MOV32r0 implicit-def dead $eflags
+  $eax = COPY %16:gr32, debug-location !161; test.c:37:1
+  %49:gr64_nosp = SHL64ri killed %48:gr64_nosp(tied-def 0), 47, implicit-def dead $eflags, debug-location !161; test.c:37:1
+  $rsp = OR64rr $rsp(tied-def 0), killed %49:gr64_nosp, implicit-def dead $eflags, debug-location !161; test.c:37:1
+  RET 0, $eax, debug-location !161; test.c:37:1
+
+# End machine code for function main.
+
+
+********** X86 speculative load hardening : __llvm_retpoline_r11 **********
