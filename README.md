@@ -133,6 +133,7 @@ Then run the bitcode with KLEESpectre with the command mentioned above without t
 
 ## Reproduce the data of Table 3 in KLEESpectre paper. 
 ```
+git checkout tags/v1.0
 cd benchmarks_cache
 ./compile.sh 
 ```
