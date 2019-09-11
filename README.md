@@ -126,6 +126,7 @@ The line starts with `KLEE: @CM` denote there is a leakage found by the KLEESpec
 
 ## Reproduce the data of Table 2 in KLEESpectre paper. 
 ```
+git checkout tags/v1.0
 cd benchmarks_original
 ./compile.sh
 ```
