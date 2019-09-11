@@ -109,7 +109,7 @@ namespace klee {
             "These options impact test generation.");
 
     cl::OptionCategory SpecCat("Speculative execution options", 
-            "These options impact the speculative paths exploring and the cache modeling");
+            "These options impact the specualtive paths exploring and the cache modeling");
 
 } // namespace klee
 
@@ -3934,6 +3934,15 @@ void dumpStateConstraint(ExecutionState &state) {
     llvm::errs() << "=======================\n";
 }
 
+ref<Expr> Executor::createSensitiveValue() {
+    std::string uniqueName("SECRET");
+    const Array *array = arrayCache.CreateArray(uniqueName, 1);
+    UpdateList updates = UpdateList(array, 0);
+    ref<Expr> temp = ReadExpr::create(updates, ConstantExpr::create(0, Expr::Int32));
+    return temp;
+}
+
+
 void Executor::executeMemoryOperation(ExecutionState &state,
         bool isWrite,
         ref<Expr> address,
@@ -4091,6 +4100,7 @@ void Executor::executeMemoryOperation(ExecutionState &state,
 
                 if (!inBounds && state.isSpeculative) {
                     //klee_message("ERROR: found out of bound memory access in line: %d, state: %ld", state.prevPC->info->assemblyLine, state.tag);
+                    result = createSensitiveValue();
                     Expr *e = dyn_cast<Expr>(result);
                     e->setSensitive();
                     spectreRecorder.recordRS(state.prevPC->info, isConst);

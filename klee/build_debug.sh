@@ -6,4 +6,4 @@ cmake \
   -DLLVM_CONFIG_BINARY=/usr/lib/llvm-6.0/bin/llvm-config \
   -DLLVMCC=/usr/bin/clang-6.0 \
   -DLLVMCXX=/usr/bin/clang++-6.0 \
-  ..
+  /home/wgh/klee/

@@ -7,5 +7,4 @@ cmake \
   -DLLVMCC=/usr/bin/clang-6.0 \
   -DLLVMCXX=/usr/bin/clang++-6.0 \
   -DCMAKE_BUILD_TYPE=Release \
-  ..
-
+  /home/wgh/klee/

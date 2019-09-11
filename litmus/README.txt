@@ -2,11 +2,16 @@
 2. Use the following command to run each limus test. 
  /PATH/TO/KLEE/ROOT/klee --search=randomsp --output-istats --enable-speculative --simplify-sym-indices --write-cvcs --write-cov --output-module --max-memory=8000 --disable-inlining --use-cex-cache --only    -output-states-covering-new --max-instruction-time=30 --max-memory-inhibit=false --max-static-fork-pct=1 --max-static-solve-pct=1 --max-static-cpfork-pct=1 --switch-type=internal test.bc
 
-3. For testing cache, compile litmus_cache.c with: 
-    clang-6.0 -g -c --emit-llvm litmus_cache.c -o litmus_cache.bc
+3. For testing cache:
+   $ cd litmus_cache
+   A. Test 2-way cache:
+   $ cd  way2
+   $ ./run_way2.sh > out.txt 2>&1
 
-   Run with command:
-     /PATH/TO/KLEE/ROOT/klee --search=randomsp --output-istats --enable-speculative --enable-cachemodel --cache-ways=2 --cache-sets=256 --simplify-sym-indices --write-cvcs --write-cov --output-module --max-memory=8000 --disable-inlining --use-cex-cache --only    -    output-states-covering-new --max-instruction-time=30 --max-memory-inhibit=false --max-static-fork-pct=1 --max-static-solve-pct=1 --max-static-cpfork-pct=1 --switch-type=internal test.bc
+   B. Test 4-way cache: 
+   $ cd way4 
+   $ ./run_way4.sh > out.txt 2>&1
 
-   --cache-ways and --cache-sets can set to 4ways (128 sets) and 8 ways (64 sets)
-   (*NOTE: the implementation changes after the submission, the results may be sightly different from the paper.)
+   C. Test 8-way cache: 
+   $ cd way8 
+   $ ./run_way8.sh > out.txt 2>&1

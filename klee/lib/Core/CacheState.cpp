@@ -460,27 +460,37 @@ void CacheState::verifyCacheSideChannel(TimingSolver *solver) {
         //bool result;
         //llvm::errs()<<"@@@@ Solving cache formula:\n";
         //final_constraint->dump();
-        ref<ConstantExpr> res;
+        //ref<ConstantExpr> res;
         ref<Expr> cache_constr_optimize = optimizer.optimizeExpr(cache_constr, false);
 
-        bool success = solver->getValue(state, cache_constr_optimize, res);
+        
+        //llvm::errs()<<"@@@@ Solving cache formula:\n";
+        //cache_constr_optimize->dump();
+
+        //bool success = solver->getValue(state, cache_constr_optimize, res);
+        Solver::Validity res;
+        bool success = solver->evaluate(state, cache_constr_optimize, res);
         const auto seconds = time::getUserTime().toMicroseconds();
         //const auto seconds = elapsed().toMicroseconds();
 
         if (!success) {
-                
             if (CacheState::found_vuls.find(target->info->assemblyLine) == CacheState::found_vuls.end()) {  
-                klee_message("@CM found a leakage (solver failed): %s: %u, ASM line=%u, time = %lu, Cache ways: %d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways);
+                klee_message("@CM found a leakage (solver failed): %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size);
                 CacheState::found_vuls.insert(target->info->assemblyLine);
             }
         } else {
-            if (res->isTrue()) {
+            if (res == Solver::True || res == Solver::Unknown) {
                 if (CacheState::found_vuls.find(target->info->assemblyLine) == CacheState::found_vuls.end()) {  
-                    klee_message("@CM: found a leakage: %s: %u, ASM line=%u, time = %lu, Cache ways: %d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways);
+                    klee_message("@CM: found a leakage: %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size);
+                    //klee_message("@CM: True" );
                     CacheState::found_vuls.insert(target->info->assemblyLine);
                 }
+            } else if (res == Solver::False) {
+                //res == Solver::False or res == Solver::unkonw
+                klee_message("@CM: No leakage for state: %ld,  %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d", state.tag, target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size);
+                //klee_message("@CM: False" );
             } else {
-                //klee_message("@CM: No leakage for state: %ld,  %s: %u, ASM line=%u, time = %lu", state.tag, target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds);
+                klee_message("@CM: Unkown");
             }
         }
 

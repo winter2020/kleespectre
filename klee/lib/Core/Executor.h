@@ -500,6 +500,8 @@ private:
   void printDebugInstructions(ExecutionState &state);
   void doDumpStates();
 
+  ref<Expr> createSensitiveValue();
+
 public:
   Executor(llvm::LLVMContext &ctx, const InterpreterOptions &opts,
       InterpreterHandler *ie);
