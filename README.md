@@ -1,5 +1,5 @@
 # KLEESpectre
-KLEESpectre is a symbolic execution engine with speculation semantic and cache modelling. KLEESPectre built on top of the KLEE symbolic execution engine, can thus provide a testing engine to check for the data leakage through cache side channel as shown via Spectre attacks. Our symbolic cache model can verify whether the sensitive data leakage due to speculative execution can be observed by an attacker at a given program point.<br />
+KLEESpectre is a symbolic execution engine with speculation semantics and cache modelling. KLEESPectre built on top of the KLEE symbolic execution engine, can thus provide a testing engine to check for the data leakage through cache side channel as shown via Spectre attacks. Our symbolic cache model can verify whether the sensitive data leakage due to speculative execution can be observed by an attacker at a given program point.<br />
 
 ## Publication 
 
@@ -36,7 +36,7 @@ These options impact the speculative paths exploring and the cache modeling
   -cache-sets=<uint>                                     - Cache sets (default=256)
   -cache-ways=<uint>                                     - Cache ways (default=2)
   -enable-cachemodel                                     - Enable Cache modeling (default=off).
-  -enable-speculative                                    - Enable Speculative exeuction modeling (default=off).
+  -enable-speculative                                    - Enable Speculative execuction modeling (default=off).
   -max-sew=<uint>                                        - Maximum SEW (default=10)
 ...
 ```
@@ -92,7 +92,7 @@ Run KLEESpectre with the generated bitcode:
 ```
 The output of KLEESpectre: 
 ```
-KLEE: WARNING: @Speculative execution modeling is enable! maxSEW=50
+KLEE: WARNING: @Speculative execution modeling is enabled! maxSEW=50
 Max instruction time: 30
 KLEE: Using STP solver backend
 KLEE: WARNING: 
@@ -122,7 +122,7 @@ KLEE: done: constant loads: 6
 KLEE: done: constant stores: 14
 ```
 A description of the output: <br />
-The line starts with `KLEE: @CM` denote there is a leakage found by the KLEESpectre with cache modeling. The lines between the "====" describe the potential leakage without the cache modeling. The line starts with `KLEE: 1BR` is the branch that misprediction of it cause data leakage. `KLEE: 2BS` denotes the code line loading the potentially sensitive data, finally the line `KLEE: 3LS` give the code line information for leaking the sensitive data to cache state. The rest part of the output is the statistic of this test including the numbers of the executed instructions, explored paths, explored speculative paths (`sp states = 2`) and so on. 
+The line starts with `KLEE: @CM` denote there is a leakage found by the KLEESpectre with cache modeling. The lines between the "====" describe the potential leakage without the cache modeling. The line starts with `KLEE: 1BR` is the branch that misprediction causes cause data leakage. `KLEE: 2BS` denotes the code line loading the potentially sensitive data, finally the line `KLEE: 3LS` give the code line information for leaking the sensitive data to cache state. The rest part of the output is the statistic of this test including the numbers of the executed instructions, explored paths, explored speculative paths (`sp states = 2`) and so on. 
 
 ## Reproduce the data of Table 2 in KLEESpectre paper. 
 ```
@@ -151,5 +151,7 @@ Output:
 ------------------------------------------------------------------------
 ```
 
-For test different cache configurations, the option `-cache-line-size=#` sets cache line size to #, the default value is 64. The Option `-cache-ways=#`  sets cache ways to #, default is 2. Option `-cache-sets=#` sets cache set to #, default value is 256. An example cache configuration is `-enable-cachemodel  -cache-ways=2 -cache-line-size=64 -cache-sets=256`. (Note that, the cache modeling only works with speculative path exploring enabled (`--enable-speculative`))
-The KLEESpectre must be re-compiled after this change.  The results are in [results_cache](results/kleespecrtre_with_cache.txt)
+To test different cache configurations, the option `-cache-line-size=#` sets cache line size to #, the default value is 64. The Option `-cache-ways=#`  sets cache ways to #, default is 2. Option `-cache-sets=#` sets cache set to #, default value is 256. An example cache configuration is `-enable-cachemodel  -cache-ways=2 -cache-line-size=64 -cache-sets=256`. (Note that, the cache modeling only works with speculative path exploring enabled (`--enable-speculative`))
+KLEESpectre must be recompiled after this change.  The results are in [results_cache](results/kleespecrtre_with_cache.txt)
+
+
