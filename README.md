@@ -3,9 +3,20 @@ KLEESpectre is a symbolic execution engine with speculation semantics and cache 
 
 ## Publication 
 
->KLEESPECTRE: Detecting Information Leakage through Speculative Cache Attacks via Symbolic Execution. Guanhua Wang, Sudipta Chattopadhyay, Arnab Kumar Biswas, Tulika Mitra, Abhik Roychoudhury.IEEE Transactions on Software Engineering, 2020. 
+> Guanhua Wang, Sudipta Chattopadhyay, Arnab Kumar Biswas, Tulika Mitra, Abhik Roychoudhury. KLEESPECTRE: Detecting Information Leakage through Speculative Cache Attacks via Symbolic Execution..IEEE Transactions on Software Engineering(2020). 
 
 Paper link: [oo7TSE](https://www.comp.nus.edu.sg/~abhik/pdf/TSE20_oo7.pdf)
+cite: <br/>
+```
+@article{guanhua2020oo7,
+  title={{oo7}: Low-overhead Defense against Spectre Attacks via Program Analysis},
+  author={Guanhua Wang and Sudipta Chattopadhyay and Ivan Gotovchits and Tulika Mitra and Abhik Roychoudhury},
+  journal={IEEE Transactions on Software Engineering},
+  year={2020},
+  publisher={IEEE}
+}
+```
+
 
 ## Environment setting up. <br />
   KLEESpectre is based on the latest KLEE, which needs the support of LLVM-6.0.  <br />
