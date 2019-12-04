@@ -9,6 +9,7 @@ Paper link: [kleespectre](https://arxiv.org/abs/1909.00647)
 
 ## Environment setting up. <br />
   KLEESpectre is based on the latest KLEE, which needs the support of LLVM-6.0.  <br />
+  NOTE: Suggest to refer "https://klee.github.io/build-llvm60/" to install all dependencies. 
   ### Install all the dependencies of LLVM 
 ```
 $sudo apt-get install build-essential curl libcap-dev git cmake libncurses5-dev python-minimal python-pip unzip libtcmalloc-minimal4 libgoogle-perftools-dev libsqlite3-dev doxygen 
