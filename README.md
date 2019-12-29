@@ -155,4 +155,14 @@ Output:
 To test different cache configurations, the option `-cache-line-size=#` sets cache line size to #, the default value is 64. The Option `-cache-ways=#`  sets cache ways to #, default is 2. Option `-cache-sets=#` sets cache set to #, default value is 256. An example cache configuration is `-enable-cachemodel  -cache-ways=2 -cache-line-size=64 -cache-sets=256`. (Note that, the cache modeling only works with speculative path exploring enabled (`--enable-speculative`))
 KLEESpectre must be recompiled after this change.  The results are in [results_cache](results/kleespecrtre_with_cache.txt)
 
-
+# Using KLEESpectre with Docker
+##Building the Docker image locally
+```
+$ git clone https://github.com/winter2020/kleespectre.git
+$ cd klee
+$ docker build -t kleespectre/kleespectre .
+```
+##Creating a KLEE Docker container
+```
+docker run --rm -ti --ulimit='stack=-1:-1' klee/klee
+```
