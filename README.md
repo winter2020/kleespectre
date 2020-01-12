@@ -162,7 +162,7 @@ $ git clone https://github.com/winter2020/kleespectre.git
 $ cd klee
 $ docker build -t kleespectre/kleespectre .
 ```
-##Creating a KLEE Docker container
+##Creating a KLEEspectre Docker container
 ```
 docker run --rm -ti --ulimit='stack=-1:-1' kleespectre/kleespectre
 ```
