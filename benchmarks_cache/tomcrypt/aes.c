@@ -1766,6 +1766,7 @@ int ECB_DEC(const unsigned char *ct, unsigned char *pt, const symmetric_key *ske
   @return CRYPT_OK if functional, CRYPT_NOP if self-test has been disabled
 */
 
+symmetric_key marked_secret_key;
 int ECB_TEST(void)
 {
  int err;
@@ -1802,29 +1803,29 @@ int ECB_TEST(void)
     }
  };
 
-  symmetric_key key;
   unsigned char tmp[2][16];
-  int i, y, x, z;
+  int i, y, z;
+  short x;
 
-  klee_make_symbolic(&key, sizeof(key), "key");
+  klee_make_symbolic(&marked_secret_key, sizeof(marked_secret_key), "key");
   //klee_make_symbolic((void *)tests, sizeof(tests), "tests");
   //klee_make_symbolic(&tmp, sizeof(tmp), "tmp");
   klee_make_symbolic(&x, sizeof(x), "x");
 
   z = victim_fun1(x);
   for (i = 0; i < (int)(sizeof(tests)/sizeof(tests[0])); i++) {
-    if ((err = rijndael_setup(tests[i].key, tests[i].keylen, 0, &key)) != CRYPT_OK) {
+    if ((err = rijndael_setup(tests[i].key, tests[i].keylen, 0, &marked_secret_key)) != CRYPT_OK) {
        return err;
     }
 
-    rijndael_ecb_encrypt(tests[i].pt, tmp[0], &key);
-    rijndael_ecb_decrypt(tmp[0], tmp[1], &key);
+    rijndael_ecb_encrypt(tests[i].pt, tmp[0], &marked_secret_key);
+    rijndael_ecb_decrypt(tmp[0], tmp[1], &marked_secret_key);
 
-    victim_fun2(x);
+    z += victim_fun2(x);
     /* now see if we can encrypt all zero bytes 1000 times, decrypt and come back where we started */
     for (y = 0; y < 16; y++) tmp[0][y] = 0;
-    for (y = 0; y < 10; y++) rijndael_ecb_encrypt(tmp[0], tmp[0], &key);
-    for (y = 0; y < 10; y++) rijndael_ecb_decrypt(tmp[0], tmp[0], &key);
+    for (y = 0; y < 10; y++) rijndael_ecb_encrypt(tmp[0], tmp[0], &marked_secret_key);
+    for (y = 0; y < 10; y++) rijndael_ecb_decrypt(tmp[0], tmp[0], &marked_secret_key);
     for (y = 0; y < 16; y++) if (tmp[0][y] != 0) return CRYPT_FAIL_TESTVECTOR;
   }
  z += victim_fun3(x);

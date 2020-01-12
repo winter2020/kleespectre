@@ -181,6 +181,20 @@ namespace {
 
 
 
+    /* 
+     * If this option is enabled, the secrets in a program should 
+     * be named using the prefix "marked_secret"
+    */ 
+
+    cl::opt<bool> OnlyDetectMarkedSecret(
+            "only-detect-marked-secret",
+            cl::desc(
+                "Only detect marked secret (default=false)"),
+            cl::init(false),
+            cl::cat(SpecCat));
+
+
+
     /* Constraint solving options */
 
     cl::opt<unsigned> MaxSymArraySize(
@@ -498,7 +512,7 @@ Executor::Executor(LLVMContext &ctx, const InterpreterOptions &opts,
             CacheConfig::cache_set_size = CacheSets;
         }
 
-        llvm::errs() << "Max instruction time: " << MaxInstructionTime<<"\n";
+        //llvm::errs() << "Max instruction time: " << MaxInstructionTime<<"\n";
 
 
         const time::Span maxCoreSolverTime(MaxCoreSolverTime);
@@ -1848,12 +1862,13 @@ void Executor::executeInstruction(ExecutionState &state, KInstruction *ki) {
         klee_message("S%ld,  inst: %d", state.tag, ki->info->assemblyLine);
     }
     */
-
-    //if (state.isSpeculative) {
-    //    llvm::errs()<<"SEW: " << state.specInstCount<<"\n";
-    //}
-    //llvm::errs() << "\n@State: " << state.tag << ", ASM line: " <<ki->info->assemblyLine<<"\n";
-    //llvm::errs() <<*(ki->inst) <<"\n\n";
+    /*
+    if (state.isSpeculative) {
+        llvm::errs()<<"SEW: " << state.specInstCount<<"\n";
+    }
+    llvm::errs() << "\n@State: " << state.tag << ", ASM line: " <<ki->info->assemblyLine<<"\n";
+    llvm::errs() <<*(ki->inst) <<"\n\n";
+    */
 
     switch (i->getOpcode()) {
         // Control flow
@@ -3934,13 +3949,16 @@ void dumpStateConstraint(ExecutionState &state) {
     llvm::errs() << "=======================\n";
 }
 
-ref<Expr> Executor::createSensitiveValue() {
+
+ref<Expr> Executor::createSensitiveValue(Expr::Width type) {
+    static int count = 0;
     std::string uniqueName("SECRET");
     const Array *array = arrayCache.CreateArray(uniqueName, 1);
     UpdateList updates = UpdateList(array, 0);
     ref<Expr> temp = ReadExpr::create(updates, ConstantExpr::create(0, Expr::Int32));
     return temp;
 }
+
 
 
 void Executor::executeMemoryOperation(ExecutionState &state,
@@ -3991,16 +4009,16 @@ void Executor::executeMemoryOperation(ExecutionState &state,
         //klee_message("Memory resolve one success");
         const MemoryObject *mo = op.first;
 
-        //llvm::errs() << "Mo size: " << mo->size <<"\n";
-        //llvm::errs() << "MaxSymArraySize: " << MaxSymArraySize <<"\n";
-        //llvm::errs() << "Addr: " << address << "\n";
+        /*
+        llvm::errs() << "Mo size: " << mo->size <<"\n";
+        llvm::errs() << "MaxSymArraySize: " << MaxSymArraySize <<"\n";
+        llvm::errs() << "Addr: " << address << "\n";
+        */
 
         if (MaxSymArraySize && mo->size >= MaxSymArraySize) {
-            //klee_message("To constant");
             address = toConstant(state, address, "max-sym-array-size");
         }
 
-        //klee_message("After to constant");
         ref<Expr> offset = mo->getOffsetExpr(address);
         ref<Expr> check = mo->getBoundsCheckOffset(offset, bytes);
         check = optimizer.optimizeExpr(check, true);
@@ -4016,7 +4034,8 @@ void Executor::executeMemoryOperation(ExecutionState &state,
         bool success = solver->mustBeTrue(state, check, inBounds);
         solver->setTimeout(time::Span());
 
-        /* 
+        /*
+
         llvm::errs() <<"State: "<< state.tag <<", Address: "<<address<<"\n";
         llvm::errs() <<"=============Memory offset Check\n";
         llvm::errs() <<"Address: "<<address<<"\n";
@@ -4033,6 +4052,7 @@ void Executor::executeMemoryOperation(ExecutionState &state,
         llvm::errs() << "check success: " <<success<<"\n";
         llvm::errs() <<"============= Check end "<<"\n\n";
         */
+       
 
 
         if (!success) {
@@ -4042,17 +4062,28 @@ void Executor::executeMemoryOperation(ExecutionState &state,
         }
 
          // Check for sensitive address
-         if (state.isSpeculative && state.isSpeculative) {
+         if (state.isSpeculative) {
              if (address.get()->getSensitive()) {
                  spectreRecorder.recordLS(state.prevPC->info, LeakageKind::inExpression, isConst);
              } else if (state.getSensitivity()) {
                  //spectreRecorder.recordLS(state.prevPC->info, LeakageKind::inConstraint, isConst);
              }
-         }
 
+         }
+         /*
+                if (isCacheEnabled) {
+                    if (state.isSpeculative) {
+                        if (address.get()->getSensitive()) {
+                            state.cacheState->load(address, state.prevPC->info);
+                        }    
+                    } else { 
+                        state.cacheState->load(address, state.prevPC->info);
+                    }    
+                }    
+        */ 
         //klee_message("In bounds: %d, spec:%d", inBounds, state.isSpeculative);
 
-        if (inBounds || state.isSpeculative) {
+        if (inBounds) {
             const ObjectState *os = op.second;
             if (isWrite) {
                 if (os->readOnly) {
@@ -4062,13 +4093,10 @@ void Executor::executeMemoryOperation(ExecutionState &state,
                     if (isConst) {
                         ++stats::constStores;
                     }
-
                     ++stats::stores;
-
                     if (state.isSpeculative) {
                         ++stats::spStores;
                     }
-
                     if (isCacheEnabled && !state.isSpeculative) {
                         state.cacheState->store(address, state.prevPC->info);
                     }
@@ -4087,28 +4115,19 @@ void Executor::executeMemoryOperation(ExecutionState &state,
                     if (state.isSpeculative) {
                         if (address.get()->getSensitive()) {
                             state.cacheState->load(address, state.prevPC->info);
-                        }
+                        }    
                     } else { 
                         state.cacheState->load(address, state.prevPC->info);
-                    }
-                }
+                    }    
+                }    
+
                 ref<Expr> result = os->read(offset, type);
 
                 if (interpreterOpts.MakeConcreteSymbolic) {
                     result = replaceReadWithSymbolic(state, result);
                 }
-
-                if (!inBounds && state.isSpeculative) {
-                    //klee_message("ERROR: found out of bound memory access in line: %d, state: %ld", state.prevPC->info->assemblyLine, state.tag);
-                    result = createSensitiveValue();
-                    Expr *e = dyn_cast<Expr>(result);
-                    e->setSensitive();
-                    spectreRecorder.recordRS(state.prevPC->info, isConst);
-                }
-
                 bindLocal(target, state, result);
             }
-
             return;
         }
     } 
@@ -4117,20 +4136,35 @@ void Executor::executeMemoryOperation(ExecutionState &state,
     // we are on an error path (no resolution, multiple resolution, one
     // resolution with out of bounds)
 
+
     address = optimizer.optimizeExpr(address, true);
     ResolutionList rl;  
     solver->setTimeout(coreSolverTimeout);
-    bool incomplete = state.addressSpace.resolve(state, solver, address, rl,
-            0, coreSolverTimeout);
+    bool incomplete = state.addressSpace.resolve(state, solver, address, rl, 0, coreSolverTimeout);
     solver->setTimeout(time::Span());
 
     // XXX there is some query wasteage here. who cares?
     ExecutionState *unbound = &state;
 
+    //llvm::errs() << "Check for overlapp, rl size: " << rl.size() <<"\n";
+
+    bool isTouchingSecret = false;
+    
     for (ResolutionList::iterator i = rl.begin(), ie = rl.end(); i != ie; ++i) {
         const MemoryObject *mo = i->first;
         const ObjectState *os = i->second;
         ref<Expr> inBounds = mo->getBoundsCheckPointer(address, bytes);
+
+        if (state.isSpeculative) {
+            std::string str;
+            mo->getAllocInfo(str);
+            //llvm::errs() << "RL memory info: " << str << "\n";
+            if (str.find("marked_secret") != std::string::npos) {
+                isTouchingSecret = true;
+                break;
+            }
+            continue;
+        }
 
         StatePair branches = fork(*unbound, inBounds, true);
         ExecutionState *bound = branches.first;
@@ -4156,13 +4190,36 @@ void Executor::executeMemoryOperation(ExecutionState &state,
             break;
     }
 
+    if (OnlyDetectMarkedSecret && !isTouchingSecret) {
+        terminateSpecState(state);
+        return;
+    }
+
+    if (state.isSpeculative && !isWrite) {
+        if (bytes != 1) {
+            //llvm::errs() << "Bytes is not 1\n";
+            terminateSpecState(state);
+            return;
+        }
+        ref<Expr> result = createSensitiveValue(type);
+        //llvm::errs() << "Create width: " << result->getWidth() << "\n";
+        Expr *e = dyn_cast<Expr>(result);
+        e->setSensitive();
+        spectreRecorder.recordRS(state.prevPC->info, isConst, isTouchingSecret);
+        bindLocal(target, state, result);
+        //klee_message("ERROR: Found leakage, touch secret: %d", isTouchingSecret);
+        return;
+    }
+
+ 
+
     // XXX should we distinguish out of bounds and overlapped cases?
     if (unbound) {
         if (incomplete) {
             terminateStateEarly(*unbound, "Query timed out (resolve).");
         } else {
             if (state.isSpeculative) {
-                 spectreRecorder.recordRS(state.prevPC->info, isConst);
+                 spectreRecorder.recordRS(state.prevPC->info, isConst, false);
             }
             //klee_message("ERROR: memory error, out of bound pointer");
             terminateStateOnError(*unbound, "memory error: out of bound pointer", Ptr, NULL, getAddressInfo(*unbound, address));

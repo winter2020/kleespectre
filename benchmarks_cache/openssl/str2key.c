@@ -302,9 +302,9 @@ void DES_set_odd_parity(DES_cblock *key) __attribute__ ((optnone))
 void DES_string_to_2keys(const char *str, DES_cblock *key1, DES_cblock *key2)
 	{
 	// DES_key_schedule ks;
-	int i,length=32;
+	int i,length=16;
 	register unsigned char j;
-    int y;
+    char y;
 
     klee_make_symbolic(&y, sizeof(y), "y");
 
@@ -384,15 +384,14 @@ void DES_string_to_2keys(const char *str, DES_cblock *key1, DES_cblock *key2)
 }
 
 
-unsigned char buff[29*64];
-DES_cblock k1, k2;
+DES_cblock marked_secret_k1, marked_secret_k2;
 int main()
 {	
 	
-    DES_cblock *key1 = &k1;
-    DES_cblock *key2 = &k1;
+    DES_cblock *key1 = &marked_secret_k1;
+    DES_cblock *key2 = &marked_secret_k2;
     //char str[16] = {0};
-    char *str = "";
+    char str[16] = "xxxxxxxxxxxx";
     int x;
 
     //klee_make_symbolic(&key1, sizeof(key1), "key1");

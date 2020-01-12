@@ -76,6 +76,7 @@ enum {
 unsigned int array1_size = 16; 
 uint8_t array1[16];
 uint8_t array2[256];
+uint8_t array3[512*64];
 uint8_t temp;
 
 
@@ -85,6 +86,7 @@ uint8_t victim_fun1(int idx) __attribute__ ((optnone)) {
     }   
     array2[8] = 2;
     array1[8] = 2;
+    array3[100*64] = 1;
     return temp;
 }
 
@@ -92,6 +94,10 @@ uint8_t victim_fun2(int idx) __attribute__ ((optnone)) {
     if (idx < array1_size) {    
         temp &= array2[array1[idx]];
     }   
+   for (int i= 0; i < 400; i++) {
+        temp |= array3[i*64];
+    }
+
     return temp;
 }
 
@@ -114,7 +120,8 @@ int base16_encode(const unsigned char *in,  unsigned long  inlen,
 {
    unsigned long i, x;
    char *alphabet;
-   int y;
+   char y;
+   int z;
 
    // LTC_ARGCHK(in     != NULL);
    // LTC_ARGCHK(out    != NULL);
@@ -133,7 +140,7 @@ int base16_encode(const unsigned char *in,  unsigned long  inlen,
    }
    x--;
    *outlen = x; /* returning the length without terminating NUL */
-    victim_fun2(y);
+    z = victim_fun2(y);
    if (options == 0) {
           for (i = 0; i < x; i += 2) 
          {
@@ -152,24 +159,24 @@ int base16_encode(const unsigned char *in,  unsigned long  inlen,
    return CRYPT_OK;
 }
 
+unsigned char marked_secret_in[16]={0}; 
+char out[256] = {0};
 int main()
 {
-   unsigned char in[16]={0}; 
-   char out[256] = {0};
    unsigned long len = 16;
    unsigned long outlen;
    unsigned int options;
-   int x;
+   short x;
+   int y;
 
-   klee_make_symbolic(&in, sizeof(in), "in");
+   klee_make_symbolic(&marked_secret_in, sizeof(marked_secret_in), "in");
    //klee_make_symbolic(&len, sizeof(len), "len");
    klee_make_symbolic(&options, sizeof(options), "options");
    klee_make_symbolic(&x, sizeof(x), "x");
-   victim_fun1(x);  
-   base16_encode(in, len, out, &outlen, options);
-   victim_fun3(x);  
+   y = victim_fun1(x);  
+   base16_encode(marked_secret_in, len, out, &outlen, options);
+   y += victim_fun3(x);  
    return 0;
-  
 }
 
 

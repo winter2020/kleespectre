@@ -763,7 +763,7 @@ int chacha20poly1305_memory(const unsigned char *key, unsigned long keylen,
 
    chacha20poly1305_state st;
    int err;
-   int y;
+   char y;
 
    // LTC_ARGCHK(key != NULL);
    // LTC_ARGCHK(iv  != NULL);
@@ -797,24 +797,24 @@ int chacha20poly1305_memory(const unsigned char *key, unsigned long keylen,
 // #endif
    return err;
 }
-
-int main() {
-    unsigned char key[16];
+    unsigned char marked_secret_key[16];
     unsigned char iv[16];
     unsigned char aad[16];
     unsigned char tag[16];
+ 
+int main() {
     int direction;
     unsigned long taglen;
-    int x;
+    short x;
     
     klee_make_symbolic(&x, sizeof(x), "x");
-    klee_make_symbolic(&key, sizeof(key), "key");
+    klee_make_symbolic(&marked_secret_key, sizeof(marked_secret_key), "key");
     klee_make_symbolic(&iv, sizeof(iv), "iv");
     klee_make_symbolic(&aad, sizeof(aad), "aad");
-    klee_make_symbolic(&tag, sizeof(tag), "tag");
+    //klee_make_symbolic(&tag, sizeof(tag), "tag");
     klee_make_symbolic(&direction, sizeof(direction), "direction");
     victim_fun1(x);
-    chacha20poly1305_memory(key, 16, iv, 16, aad, 16, tag, &taglen, direction);
+    chacha20poly1305_memory(marked_secret_key, 16, iv, 16, aad, 16, tag, 16, direction);
     victim_fun3(x);
     return 0;
 }

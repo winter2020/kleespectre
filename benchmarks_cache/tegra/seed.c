@@ -515,20 +515,20 @@ static void seed_decrypt(struct seed_ctx *ctx, u8 *out, const u8 *in)
 // MODULE_LICENSE("GPL");
 // MODULE_AUTHOR("Hye-Shik Chang <perky@FreeBSD.org>, Kim Hyun <hkim@kisa.or.kr>");
 // MODULE_ALIAS_CRYPTO("seed");
+u8 marked_secret_in[32] = {0};
+u8 out[32] = {0};
 int main() {
     struct seed_ctx ctx;
-    u8 out[32] = {0};
-    u8 in[32] = {0};
-    int x = 0;
+    short x = 0;
     klee_make_symbolic(&ctx, sizeof(ctx), "ctx");
-    klee_make_symbolic(&out, sizeof(out), "out");
-    klee_make_symbolic(&in, sizeof(in), "in");
+    //klee_make_symbolic(&out, sizeof(out), "out");
+    klee_make_symbolic(&marked_secret_in, sizeof(marked_secret_in), "in");
     klee_make_symbolic(&x, sizeof(x), "x");
     victim_fun1(x);
-    seed_set_key(&ctx, in, 32);
+    seed_set_key(&ctx, marked_secret_in, 32);
     victim_fun2(x);
-    seed_encrypt(&ctx, out, in);
-    seed_decrypt(&ctx, out, in);
+    seed_encrypt(&ctx, out, marked_secret_in);
+    seed_decrypt(&ctx, out, marked_secret_in);
     victim_fun3(x);
     return 0;
 }

@@ -301,7 +301,7 @@ int ocb3_init(ocb3_state *ocb, int cipher,
 {
    int poly, x, y, m, err;
    unsigned char *previous, *current;
-   int z;
+   char z;
    klee_make_symbolic(&z, sizeof(z), "z");
 
    // LTC_ARGCHK(ocb   != NULL);
@@ -404,24 +404,24 @@ int ocb3_init(ocb3_state *ocb, int cipher,
 }
 
 ocb3_state ocb;
-
+unsigned char marked_secret_key[32];
+unsigned char nonce[32];
+ 
 int main()
 {
-   unsigned char key[32];
-   unsigned char nonce[32];
-   unsigned long keylen=32, noncelen=10, taglen=16;
+  unsigned long keylen=32, noncelen=10, taglen=16;
    ocb.block_len = 16;
    int cipher = 0;
-   int x;
+   short x;
    klee_make_symbolic(&x, sizeof(x), "x");
-   klee_make_symbolic(&key, sizeof(key), "key");
+   klee_make_symbolic(&marked_secret_key, sizeof(marked_secret_key), "key");
    klee_make_symbolic(&nonce, sizeof(nonce), "nonce");
    //klee_make_symbolic(&taglen, sizeof(taglen), "taglen");
    //klee_make_symbolic(&noncelen, sizeof(noncelen), "noncelen");
    klee_make_symbolic(&keylen, sizeof(keylen), "keylen");
 
    victim_fun1(x);
-   ocb3_init(&ocb, cipher, key, keylen, nonce, noncelen,taglen);
+   ocb3_init(&ocb, cipher, marked_secret_key, keylen, nonce, noncelen,taglen);
    victim_fun3(x);
   return 0;
 }

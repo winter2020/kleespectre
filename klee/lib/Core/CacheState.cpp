@@ -104,8 +104,16 @@ ConstantCache::~ConstantCache() {
 }
 
 
+void CacheState::setSpectreRecord(SpectreRecorder* sr) {
+    this->recorder = sr;
+}
+
+void CacheState::recordResult(const InstructionInfo *temp, bool isVul) {
+    recorder->recordCacheResult(temp, isVul);
+}
+
 CacheState::CacheState(ExecutionState &_state) 
-    : state(_state), isSensitive(false){
+    : state(_state), isSensitive(false), recorder(NULL){
 
     }
 
@@ -124,7 +132,7 @@ CacheState::~CacheState() {
 
 }
 
-std::set<unsigned> CacheState::found_vuls;
+std::map<unsigned, int> CacheState::found_vuls;
 
 bool CacheState::conflicConstr(ref<Expr> &addr1, ref<Expr> &addr2, ref<Expr> &result) {
     if (isa<ConstantExpr>(addr1) && isa<ConstantExpr>(addr2)) {
@@ -207,6 +215,7 @@ void CacheState::store(ref<Expr> &addr, const InstructionInfo *info) {
 
 
 void CacheState::handleAccess(ref<Expr> &addr, const InstructionInfo *info) {
+    //llvm::errs() << "state: " << state.tag << "Addr: " << addr << "\n";
 
     if (state.isSpeculative && !addr.get()->getSensitive()) {
         // Do not record normal memory access on speculative paths. 
@@ -221,7 +230,7 @@ void CacheState::handleAccess(ref<Expr> &addr, const InstructionInfo *info) {
         if (target->ccstate.isFull()) {
             targets.erase(mt.first);
             const auto seconds = time::getUserTime().toMicroseconds();
-            klee_message("@@@# No leakage (Constant eviction): %s: %u, ASM line=%u, state = %lu, time = %lu", target->info->file.c_str(), target->info->line, target->info->assemblyLine, state.tag, seconds);
+            klee_message("@CM: No leakage (Constant eviction): %s: %u, ASM line=%u, state = %lu, time = %lu", target->info->file.c_str(), target->info->line, target->info->assemblyLine, state.tag, seconds);
             delete target;
             continue;
         }
@@ -323,7 +332,8 @@ void CacheState::handleAccess(ref<Expr> &addr, const InstructionInfo *info) {
         target->addr = addr;
         target->info = info;
         targets.insert(MapTarget(addr, target));
-        //llvm::errs()<<"Add new sensitive!\n" << addr<<"\n";
+        //llvm::errs()<<"Add new sensitive!\n" << addr<< "\n" << "Line: " << info->assemblyLine <<"\n";
+        //llvm::errs() << "target size: " << targets.size() << "\n";
     }
 
     //llvm::errs() << "\n";
@@ -373,10 +383,16 @@ void CacheState::verifyCacheSideChannel(TimingSolver *solver) {
         return;
     }
 
+
     std::map<ref<Expr>, Target*>::iterator map_it;
     //klee_message("@@@@============== Verify Cache Side channle for state: %ld ==============", state.tag);
+    //klee_message("Targets size: %ld", targets.size());
     // Dump for checking
     //dump();
+    //
+    //for (auto &t : targets) {
+    //    llvm::errs() << "target:" << t.second->info->assemblyLine << "\n";
+    //}
 
     // check for all sensitive address
     for (map_it = targets.begin(); map_it != targets.end(); ++map_it) {
@@ -389,7 +405,7 @@ void CacheState::verifyCacheSideChannel(TimingSolver *solver) {
         ExprSet::iterator es_it;
         ExprMap::iterator em_it;
 
-        //klee_message("Conf_addr size: %ld", target->conf_addrs.size());
+        //klee_message("Conf_addr size: %ld, line: %d", target->conf_addrs.size(), target->info->line);
         for (es_it = target->conf_addrs.begin(); es_it != target->conf_addrs.end(); ++es_it) {
             ref<Expr> addr2 = static_cast<ref<Expr>>(*es_it);
 
@@ -473,18 +489,22 @@ void CacheState::verifyCacheSideChannel(TimingSolver *solver) {
         const auto seconds = time::getUserTime().toMicroseconds();
         //const auto seconds = elapsed().toMicroseconds();
 
+        //klee_message("success");
+
         if (!success) {
             if (CacheState::found_vuls.find(target->info->assemblyLine) == CacheState::found_vuls.end()) {  
-                klee_message("@CM found a leakage (solver failed): %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size);
-                CacheState::found_vuls.insert(target->info->assemblyLine);
+                CacheState::found_vuls[target->info->assemblyLine] = 0;
+                klee_message("@CM found a leakage (solver failed): %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d, count=%d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size, CacheState::found_vuls[target->info->assemblyLine]);
             }
+            CacheState::found_vuls[target->info->assemblyLine]++;
         } else {
             if (res == Solver::True || res == Solver::Unknown) {
                 if (CacheState::found_vuls.find(target->info->assemblyLine) == CacheState::found_vuls.end()) {  
-                    klee_message("@CM: found a leakage: %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size);
-                    //klee_message("@CM: True" );
-                    CacheState::found_vuls.insert(target->info->assemblyLine);
+                    CacheState::found_vuls[target->info->assemblyLine] = 0;
+                    //CacheState::found_vuls.insert(target->info->assemblyLine);
+                    klee_message("@CM: found a leakage: %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d, count=%d", target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size, CacheState::found_vuls[target->info->assemblyLine]);
                 }
+                CacheState::found_vuls[target->info->assemblyLine]++;
             } else if (res == Solver::False) {
                 //res == Solver::False or res == Solver::unkonw
                 klee_message("@CM: No leakage for state: %ld,  %s: %u, ASM line=%u, time = %lu, Cache ways: %d, Cache set: %d", state.tag, target->info->file.c_str(), target->info->line, target->info->assemblyLine, seconds, CacheConfig::cache_ways, CacheConfig::cache_set_size);

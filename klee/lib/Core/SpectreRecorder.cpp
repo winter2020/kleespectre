@@ -13,6 +13,10 @@ using namespace klee;
 
 namespace klee {
 
+void SpectreRecorder::recordCacheResult(const InstructionInfo *temp, bool isVul) {
+
+}
+
 void SpectreRecorder::recordBR(const InstructionInfo *temp, bool isUserControlled) {
  
     InstructionInfo *br = const_cast<InstructionInfo *>(temp);
@@ -47,7 +51,7 @@ void SpectreRecorder::recordBR(const InstructionInfo *temp, bool isUserControlle
     tempRecord->br = br;
 }
 
-void SpectreRecorder::recordRS(const InstructionInfo *temp, bool isConst) {
+void SpectreRecorder::recordRS(const InstructionInfo *temp, bool isConst, bool isSecret) {
     assert(tempRecord && tempRecord->br);
 
     InstructionInfo *rs = const_cast<InstructionInfo *>(temp);
@@ -60,8 +64,8 @@ void SpectreRecorder::recordRS(const InstructionInfo *temp, bool isConst) {
         if (tempRecord->rs.empty()) {
             recordObjects.insert(std::pair<InstructionInfo*, SpectreRecord*>(tempRecord->br, tempRecord));
         }
-        if (tempRecord->rs.size() < 10000) {
-            LeakageInfo *li = new LeakageInfo(rs, LeakageKind::inExpression, isConst);
+        if (tempRecord->rs.size() < 10000000) {
+            LeakageInfo *li = new LeakageInfo(rs, LeakageKind::inExpression, isConst, isSecret);
             tempRecord->rs.insert(li);
             tempRecord->ii.insert(rs);
         }
@@ -94,7 +98,7 @@ void SpectreRecorder::recordLS(const InstructionInfo *temp, enum LeakageKind lk,
 
     if (it == tempRecord->ls_cache.end()) {
         tempRecord->ls_cache.insert(ls);
-        tempRecord->ls.insert(new LeakageInfo(ls, lk, isConst));
+        tempRecord->ls.insert(new LeakageInfo(ls, lk, isConst, false));
     }
 }
 
@@ -119,7 +123,7 @@ void SpectreRecorder::dump(llvm::raw_ostream &os) {
             //os << "RS: " << ii->file<< " : " <<  br->line << "\n";
             //os << "2RS: " << (*rs_it)->file << " : " << (*rs_it)->assemblyLine << "\n";
             LeakageInfo *li = (LeakageInfo*)*rs_it;
-            klee_message("2RS: %s: %d, ASMLine: %d, isConst: %d", li->ls->file.c_str(), li->ls->line, li->ls->assemblyLine, li->isConst);
+            klee_message("2RS: %s: %d, ASMLine: %d, isConst: %d, isMarkedSecret: %d", li->ls->file.c_str(), li->ls->line, li->ls->assemblyLine, li->isConst, li->isMarkedSecret);
         }
 
         for (std::set<LeakageInfo *>::iterator li_it=sr->ls.begin(); 

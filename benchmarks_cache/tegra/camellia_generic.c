@@ -42,8 +42,8 @@ typedef uint32_t __be32;
 
 
 unsigned int array1_size = 16; 
-uint8_t array1[16];
 uint8_t array2[256];
+uint8_t array1[16];
 uint8_t temp;
 
 uint8_t victim_fun1(int idx) __attribute__ ((optnone)) {
@@ -1355,21 +1355,21 @@ int camellia_set_key(const u8 *in_key, unsigned int key_len)
 // MODULE_LICENSE("GPL");
 // MODULE_ALIAS_CRYPTO("camellia");
 // MODULE_ALIAS_CRYPTO("camellia-generic");
+u8 marked_secret_key[16] = {0};
 int main() {
-    u32 subkey[64] = {0};
-    u8 key[32] = {0};
-    u32 keylen=32;
+    u32 subkey[16] = {0};
+    u32 keylen=16;
     u32 io[32] = {0};
     int x;
 
     klee_make_symbolic(&subkey, sizeof(subkey), "subkey");
     //klee_make_symbolic(&io, sizeof(io), "io");
     //klee_make_symbolic(&keylen, sizeof(keylen), "keylen");
-    klee_make_symbolic(&key, sizeof(key), "key");
+    klee_make_symbolic(&marked_secret_key, sizeof(marked_secret_key), "key");
     klee_make_symbolic(&x, sizeof(x), "x");
 
     victim_fun1(x);
-    camellia_set_key(key, keylen);
+    camellia_set_key(marked_secret_key, keylen);
     victim_fun2(x);
     camellia_do_encrypt(subkey,io, 24);
     camellia_do_decrypt(subkey,io, 24);

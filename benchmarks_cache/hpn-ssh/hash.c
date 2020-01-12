@@ -24,6 +24,7 @@ typedef unsigned long long uint64;
 unsigned int array1_size = 16; 
 unsigned char array1[16];
 unsigned char array2[256];
+unsigned char misdata[32768];
 
 
 unsigned char victim_fun1(int idx) __attribute__ ((optnone)){ 
@@ -313,7 +314,7 @@ int crypto_hash_sha512(unsigned char *out,const unsigned char *in,unsigned long 
   unsigned char padded[256];
   unsigned int i;
   unsigned long long bytes = inlen;
-  int y;
+  char y;
   klee_make_symbolic(&y, sizeof(y), "y");
 
   for (i = 0;i < 64;++i) h[i] = iv[i];
@@ -350,24 +351,23 @@ int crypto_hash_sha512(unsigned char *out,const unsigned char *in,unsigned long 
     blocks(h,padded,256);
   }
 
- victim_fun2(y);
+  victim_fun2(y);
   for (i = 0;i < 64;++i) out[i] = h[i];
   return 0;
 }
 
-
+unsigned char out[64] = {0};
+unsigned char marked_secret_in[256] = {0};
 int main() {
-    unsigned char out[64] = {0};
-    unsigned char in[256] = {0};
-    int x;
-    int y;
+   int x;
+   int y;
 
     klee_make_symbolic(&out, sizeof(out), "out");
-    klee_make_symbolic(&in, sizeof(in), "in");
+    klee_make_symbolic(&marked_secret_in, sizeof(marked_secret_in), "in");
     klee_make_symbolic(&x, sizeof(x), "x");
 
     y = victim_fun1(x);
-    crypto_hash_sha512(out, in, 16);
+    crypto_hash_sha512(out, marked_secret_in, 16);
     y += victim_fun3(x);
     //printf("%d", y);
     return 0; 

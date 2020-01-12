@@ -21,6 +21,9 @@ using namespace klee;
 
 void AddressSpace::bindObject(const MemoryObject *mo, ObjectState *os) {
   assert(os->copyOnWriteOwner==0 && "object already has owner");
+  std::string str;
+  mo->getAllocInfo(str);
+  //llvm::errs() << "Memory object: " << str <<", address: " << mo->address << ", size: " << mo->size << "\n";
   os->copyOnWriteOwner = cowKey;
   objects = objects.replace(std::make_pair(mo, os));
 }

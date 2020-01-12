@@ -1,3 +1,4 @@
+cd /home/wgh/timingsyn_cache/bench/
 cd hpn-ssh/
 rm *.bc
 rm *.ll

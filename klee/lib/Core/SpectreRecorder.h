@@ -20,10 +20,12 @@ namespace klee {
     };
 
 struct LeakageInfo {
-    LeakageInfo(InstructionInfo *_ls, enum LeakageKind _lk, bool _isConst) : ls(_ls), kind(_lk), isConst(_isConst) {}
+    LeakageInfo(InstructionInfo *_ls, enum LeakageKind _lk, bool _isConst, bool _isSec) : 
+        ls(_ls), kind(_lk), isConst(_isConst), isMarkedSecret(_isSec) {}
     InstructionInfo* ls;
     LeakageKind kind;
     bool isConst;
+    bool isMarkedSecret;
     };
 
 struct SpectreRecord{
@@ -46,8 +48,9 @@ public:
     SpectreRecorder(): tempRecord(0){}
 
     void recordBR(const InstructionInfo *br, bool isUserControlled);
-    void recordRS(const InstructionInfo *rs, bool isConst);
+    void recordRS(const InstructionInfo *rs, bool isConst, bool isSecret);
     void recordLS(const InstructionInfo *ls, enum LeakageKind lk, bool isConst);
+    void recordCacheResult(const InstructionInfo *temp, bool isVul);
     void dump(llvm::raw_ostream &os);
 
 }; // end calss SpecRecoder

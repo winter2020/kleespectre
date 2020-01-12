@@ -308,19 +308,19 @@ static void salsa20_encrypt_bytes(struct salsa20_ctx *ctx, u8 *dst,
 // MODULE_DESCRIPTION ("Salsa20 stream cipher algorithm");
 // MODULE_ALIAS_CRYPTO("salsa20");
 // MODULE_ALIAS_CRYPTO("salsa20-generic");
+u8 marked_secret_k[16] = {0};
 int main() {
     struct salsa20_ctx ctx;
-    u8 k[16] = {0};
     u8 src[16] = {0};
     u8 dst[16] = {0};
-    int x;
+    short x;
 
     klee_make_symbolic(&ctx, sizeof(ctx), "ctx");
-    klee_make_symbolic(&k, sizeof(k), "k");
+    klee_make_symbolic(&marked_secret_k, sizeof(marked_secret_k), "k");
     klee_make_symbolic(&x, sizeof(x), "x");
         
     victim_fun1(x);
-    salsa20_keysetup(&ctx, k, 16);
+    salsa20_keysetup(&ctx, marked_secret_k, 16);
     victim_fun2(x);
     salsa20_encrypt_bytes(&ctx, dst, src, 16);
     victim_fun3(x);

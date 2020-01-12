@@ -143,6 +143,7 @@ typedef struct DES_ks
 unsigned int array1_size = 16; 
 uint8_t array1[16];
 uint8_t array2[256];
+uint8_t array3[512*64];
 uint8_t temp;
 
 
@@ -152,6 +153,7 @@ uint8_t victim_fun1(int idx) __attribute__ ((optnone)) {
     }   
     array1[8] = 0;
     array2[8] = 0;
+    array3[8] = 0;
     return temp;
 }
 
@@ -159,6 +161,9 @@ uint8_t victim_fun2(int idx) __attribute__ ((optnone)) {
     if (idx < array1_size) {    
         temp &= array2[array1[idx]];
     }   
+    for (int i = 0; i < 400; i++) {
+        temp |= array3[i*64];
+    }
     return temp;
 }
 
@@ -360,7 +365,9 @@ void DES_3cbc_encrypt(DES_cblock *input,DES_cblock *output,long length,
 #define VERIFY  1
 #define KEYSIZ	8
 #define KEYSIZB 1024 /* should hit tty line limit first :-) */
-char key[KEYSIZB+1];
+char marked_secret_key[KEYSIZB+1];
+//char key[KEYSIZB+1];
+char *key;
 int do_encrypt,longk=0;
 FILE *DES_IN,*DES_OUT,*CKSUM_OUT;
 char uuname[200];
@@ -982,10 +989,10 @@ void doencryption(void) __attribute__((annotate("specuAnaly")))
 	char *p;
 	int num=0,j,k,l,rem,ll,len,last,ex=0;
 	DES_cblock kk,k2;
-    int y;
-    klee_make_symbolic(&key, sizeof(key), "key");
-    klee_make_symbolic(&kk, sizeof(kk), "kk");
-    klee_make_symbolic(&k2, sizeof(k2), "k2");
+    char y;
+    klee_make_symbolic(&marked_secret_key, sizeof(marked_secret_key), "key");
+    //klee_make_symbolic(&kk, sizeof(kk), "kk");
+    //klee_make_symbolic(&k2, sizeof(k2), "k2");
     klee_make_symbolic(&y, sizeof(y), "y");
 
 
@@ -1008,10 +1015,10 @@ void doencryption(void) __attribute__((annotate("specuAnaly")))
 
 	if (buf == NULL)
 	{
-		if (    (( buf=OPENSSL_malloc(BUFSIZE+8)) == NULL) ||
+		if ((( buf=OPENSSL_malloc(BUFSIZE+8)) == NULL) ||
 			((obuf=OPENSSL_malloc(BUFSIZE+8)) == NULL))
 		{
-			fputs("Not enough memory\n",stderr);
+			//fputs("Not enough memory\n",stderr);
 			Exit=10;
 			return;
 		}
@@ -1034,7 +1041,7 @@ void doencryption(void) __attribute__((annotate("specuAnaly")))
 				k=(*p-'A'+10)<<4;
 			else
 			{
-				fputs("Bad hex key\n",stderr);
+				//fputs("Bad hex key\n",stderr);
 				Exit=9;
 				return;
 			}
@@ -1047,7 +1054,7 @@ void doencryption(void) __attribute__((annotate("specuAnaly")))
 				k|=(*p-'A'+10);
 			else
 			{
-				fputs("Bad hex key\n",stderr);
+				//fputs("Bad hex key\n",stderr);
 				Exit=9;
 				return;
 			}
@@ -1313,6 +1320,7 @@ void doencryption(void) __attribute__((annotate("specuAnaly")))
 int main() {
     int x;
     klee_make_symbolic(&x, sizeof(x), "x");
+    key = (char*)marked_secret_key;
     victim_fun1(x);
     doencryption();
     victim_fun3(x);

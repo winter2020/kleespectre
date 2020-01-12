@@ -500,7 +500,8 @@ private:
   void printDebugInstructions(ExecutionState &state);
   void doDumpStates();
 
-  ref<Expr> createSensitiveValue();
+  //ref<Expr> createSensitiveValue(int w);
+  ref<Expr> createSensitiveValue(Expr::Width t);
 
 public:
   Executor(llvm::LLVMContext &ctx, const InterpreterOptions &opts,

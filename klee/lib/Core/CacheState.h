@@ -8,6 +8,7 @@
 #include "klee/ExecutionState.h"
 #include "CacheUtil.h"
 #include "../Expr/ArrayExprOptimizer.h"
+#include "SpectreRecorder.h"
 
 
 #include <vector> 
@@ -18,8 +19,10 @@
 namespace llvm {
     class Constant;
     class ConstantExpr;
+    class SpectreRecorder;
 
 }
+
 
 namespace klee {
         class Expr;
@@ -67,7 +70,8 @@ private:
     //typedef std::unordered_set<ref<Expr>> CacheSet;
     //typedef std::vector<CacheSet*>  CacheSets;
     //static std::set<unsigned> found_vuls;
-    static std::set<unsigned> found_vuls;
+    static std::map<unsigned, int> found_vuls;
+    SpectreRecorder *recorder;
     
     //std::unordered_map<ref<Expr>, Target*>  allTargets;
 
@@ -85,6 +89,8 @@ public:
     void load(ref<Expr> &addr, const InstructionInfo *info);
     void store(ref<Expr> &addr, const InstructionInfo *info);
     void verifyCacheSideChannel(TimingSolver *solver);
+    void setSpectreRecord(SpectreRecorder *sr);
+    void recordResult(const InstructionInfo *temp, bool isVul);
     void dump();
 
 }; // end calss CacheState
