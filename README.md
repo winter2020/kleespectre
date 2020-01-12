@@ -164,5 +164,5 @@ $ docker build -t kleespectre/kleespectre .
 ```
 ##Creating a KLEE Docker container
 ```
-docker run --rm -ti --ulimit='stack=-1:-1' klee/klee
+docker run --rm -ti --ulimit='stack=-1:-1' kleespectre/kleespectre
 ```
