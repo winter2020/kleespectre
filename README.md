@@ -200,7 +200,7 @@ KLEESpectre must be recompiled after this change.  The results are in [results_c
 ##Building the Docker image locally
 ```
 $ git clone https://github.com/winter2020/kleespectre.git
-$ cd klee
+$ cd kleespectre/klee
 $ docker build -t kleespectre/kleespectre .
 ```
 ##Creating a KLEEspectre Docker container
