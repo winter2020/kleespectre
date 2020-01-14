@@ -8,14 +8,14 @@ KLEESpectre is a symbolic execution engine with speculation semantics and cache 
 Paper link: [kleespectre](https://arxiv.org/abs/1909.00647)
 
 ## Environment setting up. <br />
-  KLEESpectre is based on the latest KLEE, which needs the support of LLVM-6.0.  <br />
-  NOTE: Suggest to refer "https://klee.github.io/build-llvm60/" to install all dependencies. 
-  ### Install all the dependencies of LLVM 
+KLEESpectre is based on the latest KLEE, which needs the support of LLVM-6.0.  <br />
+NOTE: Suggest to refer "https://klee.github.io/build-llvm60/" to install all dependencies. 
+### Install all the dependencies of LLVM 
 ```
 $sudo apt-get install build-essential curl libcap-dev git cmake libncurses5-dev python-minimal python-pip unzip libtcmalloc-minimal4 libgoogle-perftools-dev libsqlite3-dev doxygen 
 $ pip3 install tabulate 
 ``` 
-  ### Install LLVM-6.0 <br />
+### Install LLVM-6.0 <br />
 ```
 $ sudo apt-get install clang-6.0 llvm-6.0 llvm-6.0-dev llvm-6.0-tools 
 ``` 
@@ -29,13 +29,14 @@ $ mkdir build
 $ make -j 5
 $ sudo make install
  ```
- ### Install uClibc
- $ git clone https://github.com/klee/klee-uclibc.git  
- $ cd klee-uclibc  
- $ ./configure --make-llvm-lib  
- $ make -j2  
- $ cd .. 
-
+### Install uClibc
+```
+$ git clone https://github.com/klee/klee-uclibc.git  
+$ cd klee-uclibc  
+$ ./configure --make-llvm-lib  
+$ make -j2  
+$ cd .. 
+```
 ## Build KLEEspectre. 
 ```
 $ git clone https://github.com/winter2020/kleespectre.git
@@ -63,7 +64,7 @@ Change "/PATH/TO/ULIBC" to your ulibc path.
 $ ./buid.sh 
 $ make -j 10 
 ```    
-Now yu can the "klee" in build/bin/
+Now you can the "klee" in build/bin/
 
 ## Options to enable speculative execution and cache modeling 
 ```
