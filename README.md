@@ -10,7 +10,7 @@ Paper link: [kleespectre](https://arxiv.org/abs/1909.00647)
 ### Cite:
 ```
 @article{guanhua2020kleespectre,
-  title={KLEESPECTRE: Detecting Information Leakage through Speculative Cache Attacks via Symbolic Executio},
+  title={KLEESPECTRE: Detecting Information Leakage through Speculative Cache Attacks via Symbolic Execution},
   author={Guanhua Wang, Sudipta Chattopadhyay, Arnab Kumar Biswas, Tulika Mitra, Abhik Roychoudhury},
   journal={ACM Transactions on Software Engineering and Methodology},
   year={2020},
